@@ -20,22 +20,20 @@ class PrototypesController < ApplicationController
       #redirect_to user_registration_path(@user)
     #else
       if @prototype.save
-        @comment = @prototype.comments.build(comment_params.merge(user: current_user))
-        if @comment.save
-          redirect_to prototype_path(@prototype)
+        #@comment = @prototype.comments.build(comment_params.merge(user: current_user))
+        if @prototype.save
+          redirect_to root_path #prototype_path(@prototype)
         else
-          render :new
+          render :new, status: :unprocessable_entity
         end
-      else
-        render :new
       end
     #end
   end
 
   def show
     #@user = User.find(params[:id])
-    @prototype = Prototype.find(params[:id])
-    #@prototypes = @user.prototypes
+    #@prototype = Prototype.find(params[:id])
+    @comment = Comment.new
     @comment = @prototype.comments
 
     respond_to do |format|
@@ -72,13 +70,18 @@ class PrototypesController < ApplicationController
     params.require(:prototype).permit(:title, :catch_copy, :concept, :image)
   end
 
+  def comment_params
+    params.require(:comment).permit(:content)
+  end
+
+
   def set_prototype
     @prototype = Prototype.find(params[:id])
   end
 
   def authorize_user
-    unless @prototype.user == current_user
-      redirect_to root_path
+    unless user_signed_in? && @prototype.user == current_user
+      redirect_to root_path #new_user_session_path root_path
     end
   end
 end
